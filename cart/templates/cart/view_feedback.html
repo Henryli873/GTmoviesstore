@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Checkout Feedback</h1>
+<ul>
+    {% for feedback in feedbacks %}
+        <li>
+            <strong>{{ feedback.name|default:"Anonymous" }}</strong>: {{ feedback.statement }}
+            <small>({{ feedback.created_at|date:"F j, Y, g:i a" }})</small>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock content %}

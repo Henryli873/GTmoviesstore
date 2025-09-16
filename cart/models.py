@@ -22,3 +22,9 @@ class Item(models.Model):
         on_delete=models.CASCADE)
     def __str__(self):
         return str(self.id) + ' - ' + self.movie.name
+
+
+class CheckoutFeedback(models.Model):
+    name = models.CharField(max_length=100, blank=True, null=True)
+    statement = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

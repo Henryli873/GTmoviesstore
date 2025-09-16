@@ -6,6 +6,7 @@ from movies.models import Movie
 from .utils import calculate_cart_total
 from .models import Order, Item
 from django.contrib.auth.decorators import login_required
+from .models import CheckoutFeedback
 def index(request):
     cart_total = 0
     movies_in_cart = []
@@ -58,3 +59,15 @@ def purchase(request):
     template_data['order_id'] = order.id
     return render(request, 'cart/purchase.html',
         {'template_data': template_data})
+
+def submit_feedback(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        statement = request.POST.get('statement', '').strip()
+        if statement:  # Ensure the statement is not empty
+            CheckoutFeedback.objects.create(name=name, statement=statement)
+    return redirect('feedback_thank_you')  # Redirect to a thank-you page
+
+def view_feedback(request):
+    feedbacks = CheckoutFeedback.objects.all().order_by('-created_at')
+    return render(request, 'view_feedback.html', {'feedbacks': feedbacks})

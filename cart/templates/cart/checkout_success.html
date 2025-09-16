@@ -1,0 +1,29 @@
+{% block content %}
+<div id="feedbackModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>How was your checkout experience?</h2>
+        <form action="{% url 'submit_feedback' %}" method="post">
+            {% csrf_token %}
+            <label for="name">Name (optional):</label>
+            <input type="text" id="name" name="name" placeholder="Your name">
+            <label for="statement">Your Feedback:</label>
+            <textarea id="statement" name="statement" required></textarea>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Show the modal after checkout
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('feedbackModal');
+        modal.style.display = 'block';
+
+        // Close the modal
+        document.querySelector('.close').onclick = function () {
+            modal.style.display = 'none';
+        };
+    });
+</script>
+{% endblock content %}
