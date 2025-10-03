@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="p-3">
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col mx-auto mb-3">
+        <h2>Petitions</h2>
+        <hr />
+        {% if user.is_authenticated %}
+          <a href="{% url 'petition_create' %}" class="btn bg-dark text-white mb-3">Create a Petition</a>
+        {% else %}
+          <p><a href="{% url 'accounts.login' %}">Login</a> to create a petition.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="row">
+      {% for petition in petitions %}
+      <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card shadow p-3 rounded h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ petition.title }}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+              Created by {{ petition.created_by.username }} on {{ petition.created_at|date:"M d, Y" }}
+            </h6>
+            <p class="card-text">{{ petition.description|truncatewords:30 }}</p>
+            <p><b>Votes:</b> Yes ({{ petition.yes_votes }}) | No ({{ petition.no_votes }})</p>
+            {% if user.is_authenticated %}
+              <a href="{% url 'petition_vote' petition.id 'yes' %}" class="btn btn-success btn-sm">Vote Yes</a>
+              <a href="{% url 'petition_vote' petition.id 'no' %}" class="btn btn-danger btn-sm">Vote No</a>
+            {% else %}
+              <a href="{% url 'accounts.login' %}" class="btn bg-dark text-white btn-sm">Login to vote</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col">
+        <div class="alert alert-info">No petitions yet. Be the first to create one!</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
