@@ -39,3 +39,58 @@
     width: fit-content;
     max-height: 400px;
 }
+/* ======================================== */
+/* ===== ADD THIS FOR STAR RATING CSS ===== */
+/* ======================================== */
+
+.rate {
+    float: left;
+    height: 46px;
+    padding: 0;
+    /* Use flexbox for easy reversing */
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+/* Hide the radio buttons */
+.rate > input {
+    display: none;
+}
+
+/* Style the labels (our stars) */
+.rate > label {
+    float: right;
+    width: 1em;
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 30px;
+    color: #ccc;
+    margin: 0 2px;
+}
+
+/* Add the star character */
+.rate > label:before {
+    content: '★';
+}
+
+/* On hover, color all stars "before" it */
+.rate:not(:checked) > label:hover,
+.rate:not(:checked) > label:hover ~ label {
+    color: #deb217;
+}
+
+/* Color the selected star and all stars "before" it */
+.rate > input:checked ~ label {
+    color: #ffc700;
+}
+
+/* A more refined hover-over-checked state */
+.rate > input:checked + label:hover,
+.rate > input:checked + label:hover ~ label,
+.rate > input:checked ~ label:hover,
+.rate > input:checked ~ label:hover ~ label,
+.rate > label:hover ~ input:checked ~ label {
+    color: #c59b08;
+}
