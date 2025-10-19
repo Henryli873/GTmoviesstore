@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
 # Create your views here.
-from .models import Movie, Review
+from .models import Movie, Review, Rating
 from django.contrib.auth.decorators import login_required
 def index(request):
     search_term = request.GET.get('search')
@@ -17,10 +17,30 @@ def index(request):
 def show(request, id):
     movie = Movie.objects.get(id=id)
     reviews = Review.objects.filter(movie=movie)
+    ratings = Rating.objects.filter(movie=movie)
+    
+    # Calculate average rating
+    average_rating = 0
+    user_rating = None
+    if ratings.exists():
+        total_stars = sum(rating.stars for rating in ratings)
+        average_rating = round(total_stars / ratings.count(), 1)
+    
+    # Get current user's rating if authenticated
+    if request.user.is_authenticated:
+        try:
+            user_rating = Rating.objects.get(movie=movie, user=request.user)
+        except Rating.DoesNotExist:
+            user_rating = None
+    
     template_data = {}
     template_data['title'] = movie.name
     template_data['movie'] = movie
     template_data['reviews'] = reviews
+    template_data['ratings'] = ratings
+    template_data['average_rating'] = average_rating
+    template_data['rating_count'] = ratings.count()
+    template_data['user_rating'] = user_rating
     return render(request, 'movies/show.html', {'template_data': template_data})
 
 @login_required
@@ -59,4 +79,20 @@ def delete_review(request, id, review_id):
     review = get_object_or_404(Review, id=review_id,
         user=request.user)
     review.delete()
+    return redirect('movies.show', id=id)
+
+@login_required
+def rate_movie(request, id):
+    movie = get_object_or_404(Movie, id=id)
+    if request.method == 'POST':
+        stars = request.POST.get('rate')
+        if stars and stars.isdigit() and 1 <= int(stars) <= 5:
+            rating, created = Rating.objects.get_or_create(
+                movie=movie,
+                user=request.user,
+                defaults={'stars': int(stars)}
+            )
+            if not created:
+                rating.stars = int(stars)
+                rating.save()
     return redirect('movies.show', id=id)

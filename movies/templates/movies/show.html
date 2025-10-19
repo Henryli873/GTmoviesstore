@@ -9,6 +9,24 @@
         <hr />
         <p><b>Description:</b> {{ template_data.movie.description }}</p>
         <p><b>Price:</b> ${{ template_data.movie.price }}</p>
+        
+        <!-- Rating Display -->
+        {% if template_data.rating_count > 0 %}
+        <div class="mb-3">
+          <p><b>Average Rating:</b> 
+            <span class="stars">
+              {% for i in "12345" %}
+                {% if forloop.counter <= template_data.average_rating %}
+                  <span style="color: #ffc700;">★</span>
+                {% else %}
+                  <span style="color: #ccc;">★</span>
+                {% endif %}
+              {% endfor %}
+            </span>
+            {{ template_data.average_rating }}/5 ({{ template_data.rating_count }} rating{{ template_data.rating_count|pluralize }})
+          </p>
+        </div>
+        {% endif %}
         <p class="card-text">
             <form method="post"
               action="{% url 'cart.add' id=template_data.movie.id %}">
@@ -30,22 +48,27 @@
         {% if user.is_authenticated %}
         <div class="mt-3">
           <h4>Rate this movie</h4>
+          {% if template_data.user_rating %}
+            <p><small>Your current rating: {{ template_data.user_rating.stars }} star{{ template_data.user_rating.stars|pluralize }}</small></p>
+          {% endif %}
           <form method="POST" action="{% url 'movies.rate_movie' id=template_data.movie.id %}">
             {% csrf_token %}
             <div class="rate">
-              <input type="radio" id="star5" name="rate" value="5" />
-              <label for="star5" title="5 stars">5 stars</label>
-              <input type="radio" id="star4" name="rate" value="4" />
-              <label for="star4" title="4 stars">4 stars</label>
-              <input type="radio" id="star3" name="rate" value="3" />
-              <label for="star3" title="3 stars">3 stars</label>
-              <input type="radio" id="star2" name="rate" value="2" />
-              <label for="star2" title="2 stars">2 stars</label>
-              <input type="radio" id="star1" name="rate" value="1" />
-              <label for="star1" title="1 star">1 star</label>
+              <input type="radio" id="star5" name="rate" value="5" {% if template_data.user_rating.stars == 5 %}checked{% endif %} />
+              <label for="star5" title="5 stars"></label>
+              <input type="radio" id="star4" name="rate" value="4" {% if template_data.user_rating.stars == 4 %}checked{% endif %} />
+              <label for="star4" title="4 stars"></label>
+              <input type="radio" id="star3" name="rate" value="3" {% if template_data.user_rating.stars == 3 %}checked{% endif %} />
+              <label for="star3" title="3 stars"></label>
+              <input type="radio" id="star2" name="rate" value="2" {% if template_data.user_rating.stars == 2 %}checked{% endif %} />
+              <label for="star2" title="2 stars"></label>
+              <input type="radio" id="star1" name="rate" value="1" {% if template_data.user_rating.stars == 1 %}checked{% endif %} />
+              <label for="star1" title="1 star"></label>
             </div>
             <div style="clear: both; height: 20px;"></div>
-            <button type="submit" class="btn bg-dark text-white">Submit Rating</button>
+            <button type="submit" class="btn bg-dark text-white">
+              {% if template_data.user_rating %}Update Rating{% else %}Submit Rating{% endif %}
+            </button>
           </form>
         </div>
         {% endif %}
