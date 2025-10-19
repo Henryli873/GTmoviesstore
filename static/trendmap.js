@@ -1,11 +1,18 @@
 (function() {
   // Create the map
   var map = L.map('map', { worldCopyJump: true }).setView([20, 0], 2);
+  // Ensure correct rendering when the container uses flex or changes size
+  setTimeout(function() { map.invalidateSize(); }, 0);
 
   // Add a base tile layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+  var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19,
+    crossOrigin: true
   }).addTo(map);
+  tiles.on('tileerror', function(err) {
+    console.warn('OSM tile load error:', err);
+  });
 
   // Coarse GeoJSON features approximating continental regions (rectangles)
   var continentsGeo = {
@@ -105,12 +112,22 @@
   var continentsLayer = L.geoJSON(continentsGeo, {
     style: defaultStyle,
     onEachFeature: function(feature, layer) {
+      // Bind a blank popup to show on hover (blank content)
+      layer.bindPopup('<div class="blank-popup">&nbsp;</div>', {
+        closeButton: false,
+        autoPan: false,
+        className: 'continent-popup'
+      });
       layer.on({
         mouseover: function(e) {
           e.target.setStyle(highlightStyle);
+          // Open a blank popup at the cursor position on hover
+          e.target.openPopup(e.latlng);
         },
         mouseout: function(e) {
           continentsLayer.resetStyle(e.target);
+          // Close the blank popup when the cursor leaves the continent
+          e.target.closePopup();
         },
         click: function(e) {
           var name = feature.properties && feature.properties.name ? feature.properties.name : 'Region';

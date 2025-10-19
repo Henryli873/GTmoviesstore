@@ -36,3 +36,36 @@
   font-size: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
 }
+
+/* Blank popup styling for continent hover */
+.leaflet-popup-pane .continent-popup {
+  /* prevent popup from capturing mouse events that would trigger flicker */
+  pointer-events: none;
+}
+
+.continent-popup .leaflet-popup-content-wrapper {
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+.continent-popup .leaflet-popup-content {
+  margin: 0;
+  width: 14px;   /* small blank area */
+  height: 14px;  /* small blank area */
+}
+
+.continent-popup .leaflet-popup-tip {
+  display: none; /* hide the pointer triangle for a cleaner blank look */
+}
+
+/* Fix: Bootstrap's global img { max-width: 100% } breaks Leaflet tile sizing */
+.leaflet-container img {
+  max-width: none !important;
+}
+
+/* Optional safety: ensure the map always has a minimum height */
+#map {
+  min-height: 320px;
+}
