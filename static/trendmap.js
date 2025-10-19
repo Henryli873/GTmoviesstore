@@ -121,30 +121,69 @@
       layer.on({
         mouseover: function(e) {
           e.target.setStyle(highlightStyle);
-          // Open a blank popup at the cursor position on hover
-          e.target.openPopup(e.latlng);
+          // Fetch trending movies and show in popup
+          var name = feature.properties && feature.properties.name ? feature.properties.name : 'Region';
+          fetch('/trendmap/api/trending/' + encodeURIComponent(name) + '/')
+            .then(response => response.json())
+            .then(data => {
+              var movies = data.movies;
+              var content = '<strong>Top Movies in ' + name + '</strong><br/>';
+              if (movies.length > 0) {
+                movies.forEach(function(movie, index) {
+                  content += (index + 1) + '. ' + movie.name + ' (' + movie.purchase_count + ')<br/>';
+                });
+              } else {
+                content += 'No data available';
+              }
+              e.target.bindPopup(content).openPopup(e.latlng);
+            })
+            .catch(error => {
+              console.error('Error fetching trending movies:', error);
+              e.target.bindPopup('<strong>Error loading data</strong>').openPopup(e.latlng);
+            });
         },
         mouseout: function(e) {
           continentsLayer.resetStyle(e.target);
-          // Close the blank popup when the cursor leaves the continent
+          // Close the popup when the cursor leaves the continent
           e.target.closePopup();
         },
         click: function(e) {
-          var name = feature.properties && feature.properties.name ? feature.properties.name : 'Region';
-          console.log('Continent clicked:', name);
-          // Update placeholder area
-          var info = document.getElementById('region-info');
-          var trending = document.getElementById('trending-placeholder');
-          if (info) info.innerText = name;
-          if (trending) {
-            trending.innerHTML = '<p><strong>Trending movies in ' + name + '</strong></p>' +
-              '<ul><li>Placeholder Movie A</li><li>Placeholder Movie B</li><li>Placeholder Movie C</li></ul>';
-          }
-          // Optionally fit map to this region
-          try {
-            map.fitBounds(e.target.getBounds(), { maxZoom: 4 });
-          } catch (err) { /* ignore */ }
-        }
+           var name = feature.properties && feature.properties.name ? feature.properties.name : 'Region';
+           console.log('Continent clicked:', name);
+           // Update placeholder area
+           var info = document.getElementById('region-info');
+           var trending = document.getElementById('trending-placeholder');
+           if (info) info.innerText = name;
+           if (trending) {
+             trending.innerHTML = '<p><strong>Trending movies in ' + name + '</strong></p>' +
+               '<ul><li>Loading...</li></ul>';
+           }
+           // Fetch trending movies via AJAX
+           fetch('/trendmap/api/trending/' + encodeURIComponent(name) + '/')
+             .then(response => response.json())
+             .then(data => {
+               var movies = data.movies;
+               var html = '<p><strong>Trending movies in ' + name + '</strong></p>';
+               if (movies.length > 0) {
+                 html += '<ul>';
+                 movies.forEach(function(movie) {
+                   html += '<li>' + movie.name + ' (' + movie.purchase_count + ' purchases)</li>';
+                 });
+                 html += '</ul>';
+               } else {
+                 html += '<p>No trending movies yet.</p>';
+               }
+               if (trending) trending.innerHTML = html;
+             })
+             .catch(error => {
+               console.error('Error fetching trending movies:', error);
+               if (trending) trending.innerHTML = '<p><strong>Trending movies in ' + name + '</strong></p><p>Error loading data.</p>';
+             });
+           // Optionally fit map to this region
+           try {
+             map.fitBounds(e.target.getBounds(), { maxZoom: 4 });
+           } catch (err) { /* ignore */ }
+         }
       });
       // Make pointer cursor
       layer.setStyle({ interactive: true });

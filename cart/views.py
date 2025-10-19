@@ -52,6 +52,9 @@ def purchase(request):
         item.order = order
         item.quantity = cart[str(movie.id)]
         item.save()
+        # Increment movie purchase count
+        movie.purchase_count = movie.purchase_count + int(item.quantity)
+        movie.save()
     request.session['cart'] = {}
     template_data = {}
     template_data['title'] = 'Purchase confirmation'
